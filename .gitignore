@@ -1,3 +1,8 @@
 # exe files
 non-MPI/*.exe
 MPI/*.exe
+
+# txt files
+*.txt
+non-MPI/*.txt
+MPI/*.txt
