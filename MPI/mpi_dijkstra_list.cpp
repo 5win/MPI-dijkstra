@@ -62,9 +62,15 @@ void relax(vector<vector<Node>>& graph, vector<CW_INT>& tent, vector<bool>& visi
         Node adj_node = graph[recv_v][j];
         if(visited[adj_node.dst]) continue;                     // 방문했으면 skip
         tent[adj_node.dst] = min(tent[adj_node.dst], latest_visited[1] + adj_node.weight);      // min 개선하기
-        if(local_min_w > tent[adj_node.dst]) {
-            local_min_v = adj_node.dst;
-            local_min_w = tent[local_min_v];
+        // if(local_min_w > tent[adj_node.dst]) {
+        //     local_min_v = adj_node.dst;
+        //     local_min_w = tent[local_min_v];
+        // }
+    }
+    for(int i = 0; i < N; i++) {
+        if(!visited[i] && local_min_w > tent[i]) {
+            local_min_v = i;
+            local_min_w = tent[i];
         }
     }
     latest_visited[0] = local_min_v;
@@ -115,8 +121,15 @@ int main(int argc, char *argv[]) {
         for(CV_INT i = 0; i < N; i++) {
             MPI_Bcast(latest_visited, 2, CMPI_DTYPE, ROOT, MPI_COMM_WORLD);
 
+            if(i < 10) {
+                printf("Rank %d/%d) %d, %d\n", rank, i, latest_visited[0], latest_visited[1]);
+            }
+
             relax(graph, tent, visited, latest_visited);        // latest_visited 재사용
 
+            if(i < 10) {
+                printf("Rank %d/%d) %d, %d\n", rank, i, latest_visited[0], latest_visited[1]);
+            }
             // choose global minimum
             CV_INT global_min_v = latest_visited[0];
             CW_INT global_min_w = latest_visited[1];
@@ -129,14 +142,14 @@ int main(int argc, char *argv[]) {
                 }
             }
             // log
-            // if(i % 5000 == 0) {
-            //     printf("%d, %d\n", global_min_v, global_min_w);
-            // }
-
-            if(global_min_v != 0) {
-                visited[global_min_v] = true;               // update global visited
-                tent[global_min_v] = global_min_w;          // update global tent
+            if(i % 5000 == 0) {
+                printf("%d, %d\n", global_min_v, global_min_w);
             }
+
+            // if(global_min_v != 0) {
+            //     visited[global_min_v] = true;               // update global visited
+            //     tent[global_min_v] = global_min_w;          // update global tent
+            // }
 
             latest_visited[0] = global_min_v;
             latest_visited[1] = global_min_w;
@@ -158,15 +171,15 @@ int main(int argc, char *argv[]) {
         for(CV_INT i = 0; i < N; i++) {
             MPI_Bcast(latest_visited, 2, CMPI_DTYPE, ROOT, MPI_COMM_WORLD);
 
-            // if(i < 10) {
-            //     printf("Rank %d/%d) %d, %d\n", rank, i, latest_visited[0], latest_visited[1]);
-            // }
+            if(i < 10) {
+                printf("Rank %d/%d) %d, %d\n", rank, i, latest_visited[0], latest_visited[1]);
+            }
 
             relax(graph, tent, visited, latest_visited);
 
-            // if(i < 10) {
-            //     printf("Rank %d/%d) %d, %d\n", rank, i, latest_visited[0], latest_visited[1]);
-            // }
+            if(i < 10) {
+                printf("Rank %d/%d) %d, %d\n", rank, i, latest_visited[0], latest_visited[1]);
+            }
             // latest_visited 에 local min info 저장
             MPI_Send(latest_visited, 2, CMPI_DTYPE, ROOT, 0, MPI_COMM_WORLD);       // Send local min value
         }
