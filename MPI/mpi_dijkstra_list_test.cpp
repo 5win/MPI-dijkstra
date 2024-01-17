@@ -9,9 +9,9 @@ using namespace std;
 
 #define MAXX(x, y) (((x) > (y)) ? (x) : (y))
 #define MINN(x, y) (((x) < (y)) ? (x) : (y))
-#define N 264346
-#define M 733846
-#define ROOT 0
+// #define N 264346
+// #define M 733846
+// #define ROOT 0
 
 // Custom data type
 #define CV_INT int              // Custom Vertex data type
@@ -19,6 +19,8 @@ using namespace std;
 #define CW_INT_MAX INT32_MAX
 #define CMPI_DTYPE MPI_INT      
 
+int N;
+int ROOT = 0;
 // EDGE 가 맞는 표현인가?
 struct Node {
     CV_INT dst;
@@ -76,16 +78,9 @@ void relax(vector<vector<Node>>& graph, vector<CW_INT>& tent, vector<bool>& visi
 
 int main(int argc, char *argv[]) {
 
-    // if(argc != 3) {
-    //     cerr << "Please input file name, source vertex num!\n";
-    //     return 1;
-    // }     
-
-    // ifstream fin;
-    // fin.open(argv[1]);
-    // int startVertex = stoi(argv[2]);
-    // fin.open("../USA-road-d.NY.txt");
-
+    N = stoi(argv[argc - 2]);
+    CV_INT startVertex = stoi(argv[argc - 1]);
+    argc -= 2;
     int rank, comm_size;
     MPI_Init(&argc, &argv);                 // mpi option 주소 + 개수를 넘기면 되나?
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -100,7 +95,6 @@ int main(int argc, char *argv[]) {
     printf("Rank %d Input Complete!\n", rank);
 
     if(rank == ROOT) {
-        CV_INT startVertex = 0;
         CV_INT latest_visited[2] = {startVertex, 0};            // start node info
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Status status;

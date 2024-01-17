@@ -36,7 +36,7 @@ void dijkstra(vector<vector<Node>>& graph, int src, vector<int>& dist) {
             }
         }
 
-        if(i % 5000 == 0) {
+        if(i % 500 == 0) {
             cout << i << " / " << n - 2 << ", weight = " << min_weight << '\n';
         }
 

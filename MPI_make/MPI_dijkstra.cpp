@@ -1,31 +1,15 @@
 #include <iostream>
-#include <mpi.h>
-#include <vector>
 #include <fstream>
 #include <sstream>
 #include <chrono>
 
+#include "MPI_dijkstra.h"
+
+#define MINN(x, y) (((x) < (y)) ? (x) : (y))
+
 using namespace std;
 
-#define MAXX(x, y) (((x) > (y)) ? (x) : (y))
-#define MINN(x, y) (((x) < (y)) ? (x) : (y))
-#define N 264346
-#define M 733846
-#define ROOT 0
-
-// Custom data type
-#define CV_INT int              // Custom Vertex data type
-#define CW_INT int
-#define CW_INT_MAX INT32_MAX
-#define CMPI_DTYPE MPI_INT      
-
-// EDGE 가 맞는 표현인가?
-struct Node {
-    CV_INT dst;
-    CW_INT weight;
-};
-
-void read_graph_data(vector<vector<Node>>& graph, int& rank, int& comm_size, pair<CV_INT, CV_INT>& range) {
+void MPI_dijkstra::read_graph_data(vector<vector<Node>>& graph, int& rank, int& comm_size, std::pair<CV_INT, CV_INT>& range) {
     ifstream fin;
     fin.open("../USA-road-d.NY.txt");
 
@@ -49,7 +33,7 @@ void read_graph_data(vector<vector<Node>>& graph, int& rank, int& comm_size, pai
     }
 }
 
-void relax(vector<vector<Node>>& graph, vector<CW_INT>& tent, vector<bool>& visited, CV_INT* latest_visited, pair<CV_INT, CV_INT>& range) {
+void MPI_dijkstra::relax(vector<vector<Node>>& graph, vector<CW_INT>& tent, vector<bool>& visited, CW_INT* latest_visited, pair<CV_INT, CV_INT>& range) {
     CV_INT recv_v = latest_visited[0];
     CV_INT local_min_v = -1;                  // 다음 방문 가능한 노드 중 local minimum. (없으면 -1 반환)
     CW_INT local_min_w = CW_INT_MAX;
@@ -74,18 +58,7 @@ void relax(vector<vector<Node>>& graph, vector<CW_INT>& tent, vector<bool>& visi
     latest_visited[1] = local_min_w;
 }
 
-int main(int argc, char *argv[]) {
-
-    // if(argc != 3) {
-    //     cerr << "Please input file name, source vertex num!\n";
-    //     return 1;
-    // }     
-
-    // ifstream fin;
-    // fin.open(argv[1]);
-    // int startVertex = stoi(argv[2]);
-    // fin.open("../USA-road-d.NY.txt");
-
+void MPI_dijkstra::mpi_dijkstra_calc(int argc, char *argv[]) {
     int rank, comm_size;
     MPI_Init(&argc, &argv);                 // mpi option 주소 + 개수를 넘기면 되나?
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -100,7 +73,6 @@ int main(int argc, char *argv[]) {
     printf("Rank %d Input Complete!\n", rank);
 
     if(rank == ROOT) {
-        CV_INT startVertex = 0;
         CV_INT latest_visited[2] = {startVertex, 0};            // start node info
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Status status;
@@ -119,6 +91,7 @@ int main(int argc, char *argv[]) {
                 printf("Rank %d Finished at %d\n", rank, i);
                 break; 
             }
+
             relax(graph, tent, visited, latest_visited, range);        // latest_visited 재사용
 
             // choose global minimum
@@ -172,6 +145,4 @@ int main(int argc, char *argv[]) {
     }
 
     MPI_Finalize();
-
-    return 0;
 }
