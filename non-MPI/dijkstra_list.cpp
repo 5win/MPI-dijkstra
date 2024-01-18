@@ -56,8 +56,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    cout << "before load\n";
     ifstream fin;
-    fin.open("../USA-road-d.NY.txt");
+    fin.open("../USA-road-d.NE.txt");
+    cout << "after load\n";
 
     // int n = stoi(argv[1]);
     n = 264346;

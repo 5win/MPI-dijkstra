@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <queue>
+#include <chrono>
 
 using namespace std; 
 
@@ -55,11 +56,12 @@ int main(int argc, char *argv[]) {
     }
 
     ifstream fin;
-    fin.open("../USA-road-d.NY.txt");
+    fin.open("../USA-road-d.NE.txt");
 
     // int n = stoi(argv[1]);
-    n = 264346;
+    // n = 264346;
     m = 733846;
+    n = 1524453;
     int startVertex = stoi(argv[1]);
     vector<vector<Node>> graph(n);
     vector<int> dist(n, INT32_MAX);
@@ -79,7 +81,13 @@ int main(int argc, char *argv[]) {
 
     cout << "Input complete!\n";
 
+        using std::chrono::high_resolution_clock;
+        using std::chrono::duration;
+        auto t1 = high_resolution_clock::now();
     dijkstra(graph, startVertex - 1, dist);
+        auto t2 = high_resolution_clock::now();
+        duration<double, std::milli> ms_double = t2 - t1;
+        cout << "elapsed time : " << ms_double.count() << "ms\n";
 
     cout << "Calculate complete!\n";
 
