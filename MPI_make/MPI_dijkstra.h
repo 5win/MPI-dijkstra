@@ -1,5 +1,6 @@
 #include <vector>
 #include <mpi.h>
+#include <string>
 
 using namespace std;
 
@@ -23,7 +24,9 @@ class MPI_dijkstra {
         string input_file;
 
     public:
-        MPI_dijkstra(CV_INT n, CV_INT src, string f) : N(n), startVertex(src), input_file(f) {}
+        MPI_dijkstra(CV_INT n, CV_INT src, string f) : N(n), startVertex(src), input_file(f) {
+            ROOT = 0;
+        }
         void mpi_dijkstra_calc(int argc, char *argv[]);
     private:
         static void myMax(void* in, void* inout, int* len, MPI_Datatype* dptr);
